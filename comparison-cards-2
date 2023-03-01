@@ -1,0 +1,124 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "autosize":{"type":"none"},
+  "padding": {"left": 1, "top": 1, "right": 1, "bottom": 1},
+
+  "signals": [
+    {
+    	"name": "metricName1", "value": "$metric0.name"
+    },
+    {
+    	"name": "metricName2", "value": "$metric1.name"
+    },
+    {
+    	"name": "dimensionName", "value": "$dimension0.name"
+    },
+    {
+    	"name": "font", "value": "Montserrat"
+    },
+    {
+    	"name": "numberOfdecimalsTarget", "value": "0"
+    },
+    {
+    	"name": "numberOfdecimalsDiff", "value": "0"
+    },
+    {
+    	"name": "targetSymbol", "value": "$"
+    },
+    {
+    	"name": "metricCalculation", "value": "sum"
+    },
+    {
+    	"name": "targetCalculation", "value": "sum"
+    },
+    {
+    	"name": "metricFontSizePlus", "value": 0
+    },
+    {
+    	"name": "diffFontSizePlus", "value": 0
+    },
+    {
+    	"name": "targetFontSizePlus", "value": 0
+    },
+    {
+    	"name": "targetFontColor", "value": "#7CB342"
+    }           
+  ],
+
+  "data": [
+    {
+      "name": "default",
+      "transform": [
+        {
+          "type":"aggregate",
+          "ops": [{"signal":"metricCalculation"}, {"signal":"targetCalculation"}, "min"],
+          "fields": ["$metric0", "$metric1","index"],
+          "as": ["$metric0", "$metric1", "index"]
+        },
+        {
+          "type":"formula",
+          "expr":"'Others'",
+          "as" : "$dimension0"  
+        }                       
+      ]       
+      
+	}
+  ],
+  "marks": [
+    {
+      "type": "text",
+      "from": {"data": "default"},
+      "encode": {
+        "enter": {
+        },
+        "update": {
+          "x": {"signal": "width / 2"},
+          "y": {"signal": "1+height/8"},          
+          "align": {"value": "center"},
+          "baseline": {"value": "middle"},
+          "text": {"signal":"'Actual ' + metricName1 + ' vs. Target'"},
+          "fontSize":{"signal":"width/15+metricFontSizePlus"},
+          "font": {"signal": "font"},
+          "fontStyle": {"value": "bold"}
+        }
+      }
+    },{
+      "type": "text",
+      "from": {"data": "default"},
+      "encode": {
+        "enter": {
+        },
+        "update": {
+          "text":{"signal":"(datum.$metric0 < datum.$metric1 ? '' : '+ ') + format((datum.$metric0 / datum.$metric1 - 1) * 100,'.' + numberOfdecimalsDiff + 'f') + '%'"},
+          "x": {"signal": "width / 2"},
+          "y": {"signal": "height/2"},          
+          "fontSize":{"signal":"width/4.5+diffFontSizePlus"},
+          "align":{"value":"center"},
+          "baseline": {"value": "middle"},
+          "fontStyle": {"value": "bold"},
+          "font": {"signal": "font"},
+          "fill": {"signal": "datum.$metric0 < datum.$metric1 ? rgb('#b71c1c') : rgb('#00838f')"}
+        }
+      }
+    },{
+      "type": "text",
+      "from": {"data": "default"},
+      "encode": {
+        "enter": {
+          "fill": {"value": "black"}
+        },
+        "update": {
+          "x": {"signal": "width / 2"},
+          "y": {"signal": "height-height/7"},          
+          "fontSize":{"signal":"width/14+targetFontSizePlus"},
+          "align":{"value":"center"},
+          "baseline": {"value": "middle"},
+          "fontStyle": {"value": "bold"},
+          "font": {"signal": "font"},
+          "text":{"signal":"'Target pacing: ' + targetSymbol + format(datum.$metric1,',.' + numberOfdecimalsTarget + 'f')"},
+          "fill":{"signal":"targetFontColor"}
+        }
+      }
+    }      
+  ]
+}
